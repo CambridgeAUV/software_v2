@@ -1,0 +1,10 @@
+Header header
+string nodeid
+time timeout
+uint32[] replace
+
+cauv_control/msg_motorcontrol_demand motor_demand
+
+---
+
+int8 command_status
