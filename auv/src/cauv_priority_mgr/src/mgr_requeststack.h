@@ -10,7 +10,7 @@
 
 namespace cauv
 {
-	int get_priority(string nodeid);  //done
+	int get_priority(std::string nodeid);  //done
 
 	//A link of the linked list
 	class MgrRequestLink
@@ -25,7 +25,7 @@ namespace cauv
 		cauv_priority_mgr::srv_control_command::Request Request;
 		MgrRequestLink *next;
 		MgrRequestLink *prev;
-	}
+	};
 
 	//The whole linked list of past requests
 	class MgrRequestList
@@ -33,21 +33,20 @@ namespace cauv
 		public:
 		
 		MgrRequestList(); //done
-		~MgrRequestList(); //TODO
+		~MgrRequestList(); //done
 	
 		int insert(cauv_priority_mgr::srv_control_command::Request InboundRequest); //done
 		int remove(MgrRequestLink *RequestLink_ptr); //done
 		
-		MgrRequestLink* getTopRequestLink();  //done
-
-		int clean(); //TODO
+		bool top(cauv_priority_mgr::srv_control_command::Request &ReturnRequest); //done
+		int clean(); //done
 	
 		private:
 		
 		int num_links;
 		
 		MgrRequestLink *TopRequestLink;
-	}
+	};
 }
 
 #endif

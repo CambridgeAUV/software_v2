@@ -1,7 +1,7 @@
 Header header
 string nodeid
 time timeout
-uint32[] replace
+uint32[] replace #note: actually a vector
 
 cauv_control/msg_motorcontrol_demand motor_demand
 

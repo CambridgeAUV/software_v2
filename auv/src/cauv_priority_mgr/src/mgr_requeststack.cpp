@@ -1,5 +1,7 @@
+#include <iostream>
 #include <string>
 #include <ctime>
+#include <new>
 
 #include "ros/ros.h"
 
@@ -8,13 +10,16 @@
 
 #include "mgr_requeststack.h"
 
-int cauv::get_priority(string nodeid)
+int cauv::get_priority(std::string nodeid)
 {
-	int priority;
+	int priority=-1;
 
-	ros::param::get("/cauv/priority/" + nodeid, priority);
-	
-	return priority;
+	if(ros::param::get("/cauv/priority/" + nodeid, priority) && priority>=0 && priority<=100) return priority;
+	else
+	{
+		priority = ros::param::get("/cauv/priority/default", priority);
+		return priority;
+	}
 }
 
 cauv::MgrRequestLink::MgrRequestLink()
@@ -34,6 +39,7 @@ cauv::MgrRequestLink::MgrRequestLink(cauv_priority_mgr::srv_control_command::Req
 	Request = InboundRequest;
 	next = next_ptr;
 	prev = NULL;
+}
 
 cauv::MgrRequestLink::~MgrRequestLink(){}
 
@@ -45,17 +51,29 @@ cauv::MgrRequestList::MgrRequestList()
 	TopRequestLink = NULL;
 }
 
+cauv::MgrRequestList::~MgrRequestList()
+{
+	MgrRequestLink *Cur_Request = TopRequestLink;
+	MgrRequestLink *Next_Request;
+	while(Cur_Request != NULL)
+	{
+		Next_Request = Cur_Request->next;
+		delete Cur_Request;
+		Cur_Request = Next_Request;
+	}
+}
+
 int cauv::MgrRequestList::insert(cauv_priority_mgr::srv_control_command::Request InboundRequest)
 {
 	if (TopRequestLink == NULL)
 	{
-		TopRequestLink = new RequestLink(InboundRequest);
+		TopRequestLink = new cauv::MgrRequestLink(InboundRequest);
 		num_links = 1;
 	}
 	
 	else
 	{
-		cauv::RequestLink* CurRequest = TopRequestLink;
+		cauv::MgrRequestLink* CurRequest = TopRequestLink;
 
 		while (cauv::get_priority(CurRequest->Request.nodeid) > cauv::get_priority(InboundRequest.nodeid))
 		{
@@ -64,15 +82,15 @@ int cauv::MgrRequestList::insert(cauv_priority_mgr::srv_control_command::Request
 		
 		if (CurRequest == TopRequestLink)
 		{
-			TopRequestLink = new RequestLink(InboundRequest, TopRequestLink);
+			TopRequestLink = new MgrRequestLink(InboundRequest, TopRequestLink);
 			num_links++;
 		}
 		
 		else
 		{
-			cauv::RequestLink* NewRequest = new RequestLink(InboundRequest, CurRequest);
+			cauv::MgrRequestLink* NewRequest = new MgrRequestLink(InboundRequest, CurRequest);
 			CurRequest->prev->next = NewRequest;
-			CurRequest.prev = NewRequest;
+			CurRequest->prev = NewRequest;
 			num_links++;
 		}
 	
@@ -91,12 +109,35 @@ int cauv::MgrRequestList::remove(MgrRequestLink *RequestLink_ptr)
 
 int cauv::MgrRequestList::clean()
 {
-	for(MgrRequestLink *Cur_Request = TopRequestLink; Cur_Request != NULL; Cur_Request = Cur_Request->next)
+	cauv::MgrRequestLink *Cur_Request = TopRequestLink; 
+	cauv::MgrRequestLink *Prev_Request;
+	while (Cur_Request != NULL)
 	{
-		if(Cur_Request->Request.timeout > ros::Time::now()) remove(Cur_Request);
+		Prev_Request = Cur_Request;
+		Cur_Request = Cur_Request->next;
+		if(Prev_Request->Request.timeout < ros::Time::now()) this->remove(Prev_Request);
 	}
+	return 0;
 }
-MgrRequestLink* cauv::MgrRequestList::getTopRequestLink()
+
+bool cauv::MgrRequestList::top(cauv_priority_mgr::srv_control_command::Request &ReturnRequest)
 {
-	return TopRequestLink;
+	if(TopRequestLink == NULL) return false;
+	
+	else
+	{
+		cauv::MgrRequestLink *Cur_Request = TopRequestLink;
+		cauv::MgrRequestLink *Prev_Request;
+		cauv_priority_mgr::srv_control_command::Request ReturnRequest;
+	
+		while (Cur_Request->Request.timeout < ros::Time::now())
+		{
+			Prev_Request = Cur_Request;
+			Cur_Request = Cur_Request->next;
+			this->remove(Prev_Request);
+		}
+		ReturnRequest = Cur_Request->Request;
+		//remove(Cur_Request);
+		return true;
+	}
 }
