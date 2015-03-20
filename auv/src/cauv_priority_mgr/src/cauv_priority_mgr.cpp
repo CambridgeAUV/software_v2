@@ -1,10 +1,30 @@
 /*
-This is the priority manager node's main file.
+Node: cauv_priority_mgr
+Description: Manages accesses to the cauv_control node and distributes the commands to it.  
 
-It acts as a server, receives demands defined in the srv file, and stores them in the linked list defined in msg_requeststack.h
-Then it constantly publishes the top demand in the stack to the topic which is listened to by the control node.
+Publishes to the cauv_motorcontrol_demand topic (message type msg_motorcontrol_demand)
+Receives service requests on cauv_control_command (service type srv_control_command)
 
-However, it doesn't remove a demand from the stack as soon as it is interrupted by a higher priority demand. (implementation needed)
+
+TODO:
+
+- Feedback system from cauv_control to indicate when command is finished -> load next command
+Implement by receiving from a "cauv_motorcontrol_status" topic (0 when not finished, 1 when yes)
+Probably implement by library external to node (which will be included by cauv_control and which will use multithreading),
+and listen to cauv_motorcontrol_status in this node
+
+- Encapsulation: Scripts don't have to worry about the metadata
+Implement by library external to node, included by scripts.  
+
+- Replace: a request can indicate to remove others from the queue.
+Implement by assigning some sort of unique ID to each request (in Header)
+
+- Multithreading support
+Haha I might just have to start learning about multithreading first... :)
+
+- Remove a demand from the stack as soon as interrupted by a higher priority demand (prevent dead-locks)
+Manually do that when higher-priority demand comes? Or pop as soon as received?
+Probably the pop-when-extracted-from-stack approach more robust, less fiddly.  
 
 ard61
 */
@@ -14,7 +34,6 @@ ard61
 #include <thread>
 #include <mutex>
 #include <string>
-#include <cstdlib>
 
 #include "ros/ros.h"
 #include "ros/package.h"
@@ -66,7 +85,7 @@ int main(int argc, char* argv[])
 			nodeid = cur_line.substr(0,delimiter);
 			priority_str = cur_line.substr(delimiter+1);
 		
-			priority = atoi(priority_str.c_str());
+			priority = stoi(priority_str);
 		
 			if(priority>=0 && priority<=100)
 			{
