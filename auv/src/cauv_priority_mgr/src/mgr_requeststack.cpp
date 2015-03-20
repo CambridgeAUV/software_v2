@@ -12,13 +12,19 @@
 
 int cauv::get_priority(std::string nodeid)
 {
-	int priority=-1;
+	int priority = 0;
 
 	if(ros::param::get("/cauv/priority/" + nodeid, priority) && priority>=0 && priority<=100) return priority;
+	else if(priority = ros::param::get("/cauv/priority/default", priority) && priority >=0 && priority<=100) 
+	{
+		if(priority<0 || priority > 100) ROS_WARN_STREAM("Invalid priority (" << priority 
+			<< ") retrieved from param server for node " << nodeid << ", returning default value instead." << std::endl);
+		return priority;
+	}
 	else
 	{
-		priority = ros::param::get("/cauv/priority/default", priority);
-		return priority;
+		ROS_WARN_STREAM("The param server's default priority was invalid or could not be retrieved, returning priority 40" << std::endl);
+		return 40;
 	}
 }
 

@@ -4,7 +4,9 @@ This is the priority manager node's main file.
 It acts as a server, receives demands defined in the srv file, and stores them in the linked list defined in msg_requeststack.h
 Then it constantly publishes the top demand in the stack to the topic which is listened to by the control node.
 
-However, if doesn't remove a demand from the stack as soon as it is interrupted by a higher priority demand. (implementation needed)
+However, it doesn't remove a demand from the stack as soon as it is interrupted by a higher priority demand. (implementation needed)
+
+ard61
 */
 
 #include <iostream>
@@ -50,7 +52,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
-	else
+	else //default priority will be changed in here
 	{
 		std::string cur_line, nodeid, priority_str;
 		int priority;
@@ -83,15 +85,11 @@ int main(int argc, char* argv[])
 	
 	while (ros::ok())
 	{
-		if(RequestStack.top(Cur_Request))
-		
-		pub_motorcontrol_demand.publish(Cur_Request.motor_demand);		
+		if(RequestStack.top(Cur_Request)) pub_motorcontrol_demand.publish(Cur_Request.motor_demand);		
 		
 		ros::spinOnce();
 	}
 	
 	return 0;
 }
-
-
 
