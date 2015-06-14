@@ -12,12 +12,14 @@ TODO:
 Implement by receiving from a "cauv_motorcontrol_status" topic (0 when not finished, 1 when yes)
 Probably implement by library external to node (which will be included by cauv_control and which will use multithreading),
 and listen to cauv_motorcontrol_status in this node
+Another possible implementation is simply to merge the nodes, as well as cauv_cangate, since we don't need
+to use ROS IPC functions between them.  
 
 - Encapsulation: Scripts don't have to worry about the metadata
 Implement by library external to node, included by scripts.  
 
 - Replace: a request can indicate to remove others from the queue.
-Implement by assigning some sort of unique ID to each request (in Header)
+Implement by assigning some sort of unique ID to each request (in Header), part of library.  
 
 - Multithreading support
 Haha I might just have to start learning about multithreading first... :)
@@ -25,6 +27,11 @@ Haha I might just have to start learning about multithreading first... :)
 - Remove a demand from the stack as soon as interrupted by a higher priority demand (prevent dead-locks)
 Manually do that when higher-priority demand comes? Or pop as soon as received?
 Probably the pop-when-extracted-from-stack approach more robust, less fiddly.  
+
+- Make the priority system more user-friendly:
+Allow nodes to set sub-priorities for their messages, up to a certain bound?
+Recursive priority property? (priority = priority of original script)
+
 
 ard61
 */
