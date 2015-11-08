@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "include/cauv_cangate/msg_motor_command.h"
+#include <cauv_cangate/msg_motor_command.h>
 #include <sensor_msgs/Joy.h>
 
 class ControlOp
