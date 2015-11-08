@@ -1,0 +1,27 @@
+<!-- %Tag(FULL)%-->
+<launch>
+
+ <!-- Cangate Node-->
+  <node pkg="cauv_cangate" type="cauv_cangate" name="cauv_cangate"/>
+
+
+ <!-- joy node -->
+  <node respawn="true" pkg="joy"
+        type="joy_node" name="control_joy" >
+    <param name="dev" type="string" value="/dev/input/js2" />
+    <param name="deadzone" value="0.12" />
+  </node>
+
+ <!-- Axes -->
+  <param name="axis_prop_l" value="1" type="int"/>
+  <param name="axis_strafe_l" value="0" type="int"/>
+  <param name="axis_pitch_r" value ="3" type="int"/>
+  <param name="axis_turn_r" value="2" type="int"/>
+  <param name="scale_vert" value="2" type="double"/>
+  <param name="scale_horz" value="2" type="double"/>
+
+ <!-- Controlop Node-->
+  <node pkg="cauv_gamepad" type="control_op" name="control_translate"/>
+
+</launch>
+<!-- %EndTag(FULL)%-->
