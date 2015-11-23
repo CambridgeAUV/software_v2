@@ -9,23 +9,19 @@ if(COMPILER_SUPPORTS_CXX11)
 endif()
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp roslib rospy std_msgs genmsg)
+#find_package(catkin REQUIRED COMPONENTS roscpp roslib rospy std_msgs genmsg)
 
 ## Declare ROS messages and services
-add_service_files(FILES srv_control_command.srv)
+#add_service_files(FILES srv_control_command.srv)
 
 ## Generate added messages and services
-generate_messages(DEPENDENCIES std_msgs cauv_control)
+#generate_messages(DEPENDENCIES std_msgs)
 
 ## Declare a catkin package
 catkin_package()
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${CATKIN_DEVEL_PREFIX})
 
-add_executable(cauv_priority_mgr src/cauv_priority_mgr.cpp src/mgr_requeststack.cpp)
-target_link_libraries(cauv_priority_mgr ${catkin_LIBRARIES})
-add_dependencies(cauv_priority_mgr cauv_priority_mgr_generate_messages_cpp)
-
-#add_executable(cauv_motor_control_test_write src/cauv_motor_control_test_write.cpp)
-#target_link_libraries(cauv_motor_control_test_write ${catkin_LIBRARIES})
-#add_dependencies(cauv_motor_control_test_write cauv_motor_control_test_write_generate_messages_cpp)
+#add_executable(cauv_priority_mgr src/cauv_priority_mgr.cpp src/mgr_requeststack.cpp)
+#target_link_libraries(cauv_priority_mgr ${catkin_LIBRARIES})
+#add_dependencies(cauv_priority_mgr cauv_priority_mgr_generate_messages_cpp)

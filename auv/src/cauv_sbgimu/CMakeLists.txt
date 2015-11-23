@@ -103,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES cauv_sbgimu
-#  CATKIN_DEPENDS roscpp std_msg
+  CATKIN_DEPENDS roscpp message_runtime
 #  DEPENDS system_lib
 )
 
