@@ -1,6 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+/*
+cauv_cangate ROS node:
+
+Interfaces with CAN devices (motor control board and pressure sensors)
+
+Reads information from pressure sensors and publishes it on the
+cauv_pressure_status ROS topic.
+
+Subscribes to the cauv_motor_command topic and sends the commands
+to the motor control board.  
+*/
 
 #include <string.h>
 
@@ -35,20 +43,6 @@ void cauv_motor_send_command(const cauv_cangate::msg_motor_command& motor_contro
 	write(mysocket, &frame, sizeof(struct can_frame)); 
 }
 
-int cauv_pressure_receive_status(cauv_cangate::msg_pressure_status& pressure_status_message, const struct can_frame& frame)
-{
-	if(frame.data[4] == 0)
-	{
-		memcpy(&pressure_status_message.fwd_pressure, &frame.data, 2);
-	}
-	
-	if(frame.data[4] == 1)
-	{
-		memcpy(&pressure_status_message.aft_pressure, &frame.data, 2);
-	}
-	
-	return 0;
-}
 
 int main(int argc, char **argv)
 {
@@ -99,9 +93,18 @@ int main(int argc, char **argv)
 		read(mysocket,&last_frame_in_buffer,sizeof(struct can_frame));
 		
 		//Parse frames by address		
-		if (last_frame_in_buffer.can_id == 11)
+		if (last_frame_in_buffer.can_id == 11)  // This frame comes from a pressure sensor
 		{
 			cauv_pressure_receive_status(pressure_status_message, last_frame_in_buffer);
+			if(frame.data[4] == 0)
+			{
+				memcpy(&pressure_status_message.fwd_pressure, &last_frame_in_buffer.data, 2);
+			}
+			
+			if(frame.data[4] == 1)
+			{
+				memcpy(&pressure_status_message.aft_pressure, &last_frame_in_buffer.data, 2);
+			}
 			pub_pressure_status.publish(pressure_status_message);
 		}
 		
