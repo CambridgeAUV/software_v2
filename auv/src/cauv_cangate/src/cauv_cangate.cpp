@@ -95,13 +95,12 @@ int main(int argc, char **argv)
 		//Parse frames by address		
 		if (last_frame_in_buffer.can_id == 11)  // This frame comes from a pressure sensor
 		{
-			cauv_pressure_receive_status(pressure_status_message, last_frame_in_buffer);
-			if(frame.data[4] == 0)
+			if(last_frame_in_buffer.data[4] == 0)
 			{
 				memcpy(&pressure_status_message.fwd_pressure, &last_frame_in_buffer.data, 2);
 			}
 			
-			if(frame.data[4] == 1)
+			if(last_frame_in_buffer.data[4] == 1)
 			{
 				memcpy(&pressure_status_message.aft_pressure, &last_frame_in_buffer.data, 2);
 			}
