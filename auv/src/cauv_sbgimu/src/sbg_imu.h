@@ -3,6 +3,10 @@
  * See license.txt for details.
  */
 
+/*
+Defines the cauv::sbgIMU class, which allows interfacing with the SBG IMU.  
+Implementation in sbg_imu.cpp
+*/
 
 #ifndef __CAUV_SBG_IMU_H__
 #define __CAUV_SBG_IMU_H__
@@ -18,7 +22,7 @@ class sbgIMU
         ~sbgIMU();
 
         void initialise();
-        double* getYPR();
+        int getYPR(double (&euler)[3]);
 
     private:
         

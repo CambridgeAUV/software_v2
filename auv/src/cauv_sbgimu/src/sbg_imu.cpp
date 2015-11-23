@@ -1,11 +1,8 @@
-#include <string>
-#include <iostream>
-#include <cstdio>
+/*
+Implementation of the sbgIMU class, see sbg_imu.h
+*/
 
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-#include <boost/thread.hpp>
+#include <string>
 
 //#define CAUV_DEBUG_COMPAT
 //#include <debug/cauv_debug.h>
@@ -64,28 +61,28 @@ sbgIMU::~sbgIMU()
 }
 
 
-double* sbgIMU::getYPR()
+int sbgIMU::getYPR(double (&euler)[3])
 {
-    double Euler [3];
     error = sbgGetSpecificOutput(protocolHandle, SBG_OUTPUT_EULER, &output);
     if (error == SBG_NO_ERROR)
     {
         // X - forward, z - upwards
-        // Euler[0] - roll
-        // Euler[1] - pitch
-        // Euler[2] - yaw
-        Euler[0] = SBG_RAD_TO_DEG(output.stateEuler[0]);
-        Euler[1] = SBG_RAD_TO_DEG(output.stateEuler[1]);
-        Euler[2] = SBG_RAD_TO_DEG(output.stateEuler[2]);
+        // euler[0] - roll
+        // euler[1] - pitch
+        // euler[2] - yaw
+        euler[0] = SBG_RAD_TO_DEG(output.stateEuler[0]);
+        euler[1] = SBG_RAD_TO_DEG(output.stateEuler[1]);
+        euler[2] = SBG_RAD_TO_DEG(output.stateEuler[2]);
 
-        //printf("%3.2f\t%3.2f\t%3.2f\n",    Euler[0],
-        //                                Euler[1],
-        //                                Euler[2]);
-        return Euler;
+        //printf("%3.2f\t%3.2f\t%3.2f\n",    euler[0],
+        //                                euler[1],
+        //                                euler[2]);
+        return 0;
     }
     else
     {
         ROS_WARN_STREAM("Lost connection to sbg, error code: " << error);
+        return -1;
     }
     //sbgSleep(m_pause_time);
 }
