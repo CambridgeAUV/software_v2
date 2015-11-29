@@ -5,30 +5,9 @@
 
 #pragma once
 
-#include <deque>
-#include <vector>
-#include <string>
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <cauv_control/PIDState.h>
-#include <cauv_control/PIDParams.h>
-#include <cauv_control/PIDTarget.h>
-#include <cauv_control/ControlToken.h>
-
-#include <utility/time.h>
-#include <utility/inbox.h>
-
-#include <ros/publisher.h>
+#include <ctime>
 
 namespace cauv {
-
-struct TokenLock {
-    cauv_control::ControlToken current_token;
-    boost::posix_time::ptime current_tok_time;
-};
-
-bool check_lock_token(TokenLock &lock, const cauv_control::ControlToken &token);
 
 class PIDControl
 {
@@ -42,27 +21,26 @@ class PIDControl
         bool is_angle;
         bool enabled;
 
-        PIDControl(std::string topic, boost::shared_ptr<TokenLock> token_lock_, bool is_angle);
-        double getMV(double current);
+        PIDControl(bool is_angle);
+        ~PIDControl();
+        void initialise(double _Kp, double _Ki, double _Kd, double _scale,
+                        double _Ap, double _Ai, double _Ad, double _thr,
+                        double _errorMAX);
+        double output(double current_value);
         void reset();
 
     private:
         double integral, previous_derror, previous_mv;
-        std::deque< std::pair<TimeStamp, double> > previous_errors;
-        TimeStamp previous_time;
-        int retain_samples_msecs;
 
-        void onTargetMessage(const cauv_control::PIDTarget::Ptr &m);
-        void onParamsMessage(const cauv_control::PIDParams::Ptr &m);
+        double error, previous_error;
+
+        std::time_t time_current_signal;
+        std::time_t time_previous_signal;
 
         double getErrorAngle(double const& target, double const& current);
         double getError(double const& target, double const& current);
         double smoothedDerivative();
 
-        boost::shared_ptr<TokenLock> token_lock;
-
-        ros::Subscriber params_sub;
-        ros::Subscriber target_sub;
         ros::Publisher state_pub;
 };
 

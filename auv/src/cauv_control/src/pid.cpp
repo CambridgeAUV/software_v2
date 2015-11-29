@@ -6,45 +6,12 @@
 #include "pid.h"
 #include <utility/math.h>
 #include <utility/rounding.h>
-#include <boost/make_shared.hpp>
+#include <ctime>
 
-#include <ros/node_handle.h>
-
-#define CAUV_DEBUG_COMPAT
-#include <debug/cauv_debug.h>
+// #define CAUV_DEBUG_COMPAT
+// #include <debug/cauv_debug.h>
 
 using namespace cauv;
-
-bool cauv::check_lock_token(TokenLock &lock, const cauv_control::ControlToken &token) {
-    boost::posix_time::ptime current_time = boost::posix_time::microsec_clock::universal_time();
-    if ((current_time - lock.current_tok_time).total_milliseconds() < lock.current_token.timeout) {
-        //token has not timed out
-        if (token.priority < lock.current_token.priority) {
-            return false; //lower priority always loses
-        }
-        if (token.priority == lock.current_token.priority &&
-            token.token > lock.current_token.token) {
-            return false; //use token (which should be unique, and is currently the start time of the process) as tiebreaker
-        }
-    }
-    //New lock token has won (either from same process or higher priority process, or timeout)
-    if (lock.current_token.token != token.token) {
-        info() << "Lock Token" << token.token << "(Priority"
-               << token.priority << ")won over token" << lock.current_token.token;
-    }
-    lock.current_token = token;
-    lock.current_tok_time = current_time;
-    return true;
-}
-
-//TODO: merge this into time.h (There's a conflicting definition in
-//mapping/stuff.h which returns seconds
-static float operator-(TimeStamp const& l, TimeStamp const& r)
-{
-    int secs_delta = l.secs - r.secs;
-    float msecs_delta = (l.musecs - r.musecs) / 1000.0f;
-    return 1000 * secs_delta + msecs_delta;
-}
 
 PIDControl::PIDControl(std::string topic, boost::shared_ptr<TokenLock> lock_, bool is_angle_)
         : target(0),
@@ -55,38 +22,30 @@ PIDControl::PIDControl(std::string topic, boost::shared_ptr<TokenLock> lock_, bo
           errorMAX(1000),
           is_angle(is_angle_), enabled(false),
           integral(0), previous_derror(0), previous_mv(0),
+          error(0), previous_error(0),
           retain_samples_msecs(1000),
           token_lock(lock_)
 {
     ros::NodeHandle h;
-    params_sub = h.subscribe(topic + "params", 10, &PIDControl::onParamsMessage, this);
-    target_sub = h.subscribe(topic + "target", 1,  &PIDControl::onTargetMessage, this);
     state_pub = h.advertise<cauv_control::PIDState>(topic + "state", 5);
     if (!state_pub) {
         throw std::runtime_error("Empty State Publisher!");
     }
 }
 
-void PIDControl::onTargetMessage(const cauv_control::PIDTarget::Ptr &m) {
-    if (check_lock_token(*token_lock, m->token)) {
-        if (m->enabled && !enabled) {
-            reset();
-        }
-        enabled = m->enabled;
-        target = m->target;
-    }
-}
-
-void PIDControl::onParamsMessage(const cauv_control::PIDParams::Ptr &m) {
-    Kp       = m->Kp;
-    Ki       = m->Ki;
-    Kd       = m->Kd;
-    scale    = m->scale;
-    Ap       = m->Ap;
-    Ai       = m->Ai;
-    Ad       = m->Ad;
-    thr      = m->thr;
-    errorMAX = m->maxError; //I'm special!
+void PIDControl::initialise(double _Kp, double _Ki, double _Kd, double _scale,
+                double _Ap, double _Ai, double _Ad, double _thr,
+                double _errorMAX)
+{
+    Kp       = _Kp;
+    Ki       = _Ki;
+    Kd       = _Kd;
+    scale    = _scale;
+    Ap       = _Ap;
+    Ai       = _Ai;
+    Ad       = _Ad;
+    thr      = _thr;
+    errorMAX = _errorMAX;
 }
 
 void PIDControl::reset()
@@ -111,7 +70,7 @@ double PIDControl::getError(double const& target, double const& current)
     return target - current;
 }
 
-double PIDControl::smoothedDerivative()
+/*double PIDControl::smoothedDerivative()
 {
     int n_derivatives = 0;
     double derivative_sum = 0;
@@ -138,18 +97,24 @@ double PIDControl::smoothedDerivative()
         return 0.0;
     }
     return derivative_sum / n_derivatives;
+
+    // For an alternative way, see https://books.google.co.uk/books?id=BcnwAAAAQBAJ&pg=PA103&lpg=PA103&dq=control+theory+derivative+smoothing&source=bl&ots=DbjmoYVpSj&sig=5DXqqcATMb0oIndoaNLeuLzMQ-4&hl=en&sa=X&ved=0ahUKEwi8n_qpubbJAhXGWBQKHej6DM8Q6AEIMTAC#v=onepage&q=control%20theory%20derivative%20smoothing&f=false
+}*/
+
+double PIDControl::smoothedDerivative()
+{
+    return (error - previous_error)/(time_current_signal - time_previous_signal);
 }
 
-double PIDControl::getMV(double current)
+double PIDControl::getMV(double current_value)
 {
-    double error;
     if(is_angle)
         error = getErrorAngle(target, current);
     else
         error = getError(target, current);
     error = clamp(-errorMAX, error, errorMAX);
 
-    if (previous_time.secs == 0) {
+    if (time_current_signal == 0) {
         previous_time = now();
         previous_errors.push_back(std::make_pair(previous_time, error));
         return 0;
@@ -157,7 +122,7 @@ double PIDControl::getMV(double current)
 
     TimeStamp tnow = now();
     previous_errors.push_back(std::make_pair(tnow, error));
-    while((tnow - previous_errors.front().first) > retain_samples_msecs)
+    while((tnow - previous_errors.front().first) > retain_samples_msecs) // Delete outdated demands
         previous_errors.pop_front(); 
 
     double dt = tnow - previous_time; // dt is milliseconds
