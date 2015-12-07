@@ -29,6 +29,12 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	ros::Rate loopRate(100);
 
+	std::string device_name;
+	int baud_rate, pause_time;
+	nh.param<std::string>("device", device_name, "/dev/usbmon1");
+	nh.param("baud_rate", baud_rate, 115200);
+	nh.param("pause_time", pause_time, 10);
+
 	cauv_control::msg_floatYPR imu_YPR_message;
 
 	int error;
@@ -37,7 +43,7 @@ int main(int argc, char **argv)
 	ros::Publisher pub_sbgimu_status = nh.advertise<cauv_control::msg_floatYPR>("cauv_control_YPR", 1000);
 	
 	// sbgIMU constructor takes three arguments: port, baud_rate and pause_time.  
-	sbgIMU* sbg_imu = new sbgIMU("/dev/usbmon1", 115200, 10);
+	sbgIMU* sbg_imu = new sbgIMU(device_name, baud_rate, pause_time);
 
 	sbg_imu->initialise();
 
