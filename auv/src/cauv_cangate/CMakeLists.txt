@@ -5,7 +5,7 @@ project(cauv_cangate)
 find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
 
 ## Declare ROS messages and services
-add_message_files(FILES msg_motor_command.msg msg_pressure_status.msg)
+add_message_files(FILES msg_motor_demand.msg msg_pressure_status.msg)
 
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)

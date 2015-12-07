@@ -22,12 +22,12 @@ to the motor control board.
 
 #include "ros/ros.h"
 
-#include <cauv_cangate/msg_motor_command.h>
+#include <cauv_cangate/msg_motor_demand.h>
 #include <cauv_cangate/msg_pressure_status.h>
 
 int mysocket;
 
-void cauv_motor_send_command(const cauv_cangate::msg_motor_command& motor_control_message)
+void cauv_motor_send_command(const cauv_cangate::msg_motor_demand& motor_control_message)
 {
 	struct can_frame frame;
 	
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle mynode;
 	ros::Rate loopRate(100);
 	
-	ros::Subscriber sub_motor_command = mynode.subscribe("cauv_motor_command", 1000, cauv_motor_send_command);
+	ros::Subscriber sub_motor_command = mynode.subscribe("cauv_motor_demand", 1000, cauv_motor_send_command);
 	ros::Publisher pub_pressure_status = mynode.advertise<cauv_cangate::msg_pressure_status>("cauv_pressure_status", 1000);
 	
 	cauv_cangate::msg_pressure_status pressure_status_message;
