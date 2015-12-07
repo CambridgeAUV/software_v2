@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	ros::Publisher pub_sbgimu_status = nh.advertise<cauv_control::msg_floatYPR>("cauv_control_YPR", 1000);
 	
 	// sbgIMU constructor takes three arguments: port, baud_rate and pause_time.  
-	sbgIMU* sbg_imu = new sbgIMU(device_name, baud_rate, pause_time);
+	sbgIMU* sbg_imu = new sbgIMU(device_name.c_str(), baud_rate, pause_time);
 
 	sbg_imu->initialise();
 
