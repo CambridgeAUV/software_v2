@@ -1,0 +1,18 @@
+<package>
+    <name>cauv_utility</name>
+    <version>1.0.0</version>
+    <description>
+        Various utility functions and headers which don't belong anywhere else.
+        Avoid build dependencies on anything except boost.
+        Header-only dependencies are OK
+    </description>
+    <url>http://www.cauv.co.uk</url>
+    <license>CAUV</license>
+    <maintainer email="make_a_wish@fairyland.com">The Magic Software Fairy</maintainer>
+
+    <author>Calculators Against Useless Vehicles</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend> boost </build_depend>
+    <run_depend> boost </run_depend>
+</package>
