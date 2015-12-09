@@ -14,11 +14,15 @@ namespace cauv {
 class PIDControl
 {
     public:
+        // PID loop parameters that need to be manually set
         double Kp,Ki,Kd,scale;
         double Ap, Ai, Ad, thr;
         double KpMAX, KpMIN, KdMAX, KdMIN, KiMAX, KiMIN;
         double Kp1, Ki1, Kd1;
         double errorMAX;
+        double derivative_smoothing_coef;
+
+        // Extra properties
         bool is_angle;
         bool enabled;
 
@@ -31,16 +35,16 @@ class PIDControl
         void reset();
 
     private:
-        double integral, previous_derror, previous_mv;
-
+        double dt;
         double error, previous_error;
+        double ierror;
+        double derror;
+        double demand;
 
-        TimeStamp time_current_signal;
         TimeStamp time_previous_signal;
 
         double getErrorAngle(double const& target, double const& current);
         double getError(double const& target, double const& current);
-        double smoothedDerivative();
 };
 
 } // namespace cauv

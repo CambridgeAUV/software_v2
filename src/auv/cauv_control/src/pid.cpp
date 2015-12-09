@@ -23,8 +23,11 @@ PIDControl::PIDControl(bool is_angle_)
           Kp1(1), Ki1(1), Kd1(1),
           errorMAX(1000),
           is_angle(is_angle_), enabled(false),
-          integral(0), previous_derror(0), previous_mv(0),
-          error(0), previous_error(0)
+          dt(0),
+          error(0), previous_error(0),
+          ierror(0),
+          derror(0),
+          demand(0)
 {}
 
 void PIDControl::initialise(double _Kp, double _Ki, double _Kd, double _scale,
@@ -44,13 +47,12 @@ void PIDControl::initialise(double _Kp, double _Ki, double _Kd, double _scale,
 
 void PIDControl::reset()
 {
-    integral = 0;
+    dt = 0;
     error = 0;
     previous_error = 0;
-    previous_derror = 0;
-    previous_mv = 0;
-    time_current_signal.secs = 0;
-    time_current_signal.musecs = 0;
+    ierror = 0;
+    derror = 0;
+    demand = 0;
     time_previous_signal.secs = 0;
     time_previous_signal.musecs = 0;
 }
@@ -68,67 +70,37 @@ double PIDControl::getError(double const& target, double const& current)
     return target - current;
 }
 
-/*double PIDControl::smoothedDerivative()
-{
-    int n_derivatives = 0;
-    double derivative_sum = 0;
-
-    if(!previous_errors.size()){
-        warning() << "no derivative samples available";        
-        return 0.0;
-    }
-
-    for(int i = 0;i < int(previous_errors.size())-1; i++) {
-        float dt_msecs = (previous_errors[i+1].first - previous_errors[i].first);
-        if(dt_msecs != 0) {
-            derivative_sum += (previous_errors[i+1].second - previous_errors[i].second) / dt_msecs;
-            n_derivatives++;
-        } else {
-            error() << "controller update frequency too high";
-        }
-        if(dt_msecs < 2) {
-            warning() << "controller update frequency < 2ms";
-        }
-    }
-    if(!n_derivatives) {
-        warning() << "no derivative samples used";
-        return 0.0;
-    }
-    return derivative_sum / n_derivatives;
-
-    // For an alternative way, see https://books.google.co.uk/books?id=BcnwAAAAQBAJ&pg=PA103&lpg=PA103&dq=control+theory+derivative+smoothing&source=bl&ots=DbjmoYVpSj&sig=5DXqqcATMb0oIndoaNLeuLzMQ-4&hl=en&sa=X&ved=0ahUKEwi8n_qpubbJAhXGWBQKHej6DM8Q6AEIMTAC#v=onepage&q=control%20theory%20derivative%20smoothing&f=false
-}*/
-
-double PIDControl::smoothedDerivative()
-{
-    return (error - previous_error)/(1000* (time_current_signal - time_previous_signal)); // We want times in milliseconds
-}
-
 double PIDControl::get_demand(double target, double current)
 {
-    if (time_current_signal.secs == 0) {
-        time_current_signal = now();
+    // Update the previous error "history" variable
+    previous_error = error;
+
+    // If first iteration, then just update time and bail out
+    if (time_previous_signal.secs == 0) {
+        time_previous_signal = now();
         return 0;
     }
 
-    time_previous_signal = time_current_signal;
-    previous_error = error;
-    time_current_signal = now();
+    // Calculate dt and update time
+    dt = 1000*(now() - time_previous_signal); // dt is in milliseconds
+    time_previous_signal = now();
 
+    // Calculate error
     if(is_angle)
         error = getErrorAngle(target, current);
     else
         error = getError(target, current);
     error = clamp(-errorMAX, error, errorMAX);
 
-    double dt = 1000*(time_current_signal - time_previous_signal); // dt is in milliseconds
-    integral += error*dt;
-    integral = clamp(-errorMAX, integral, errorMAX);
+    // Calculate error integral
+    ierror += error*dt;
+    ierror = clamp(-errorMAX, ierror, errorMAX);
 
-    double de = smoothedDerivative();
-    de = clamp(-errorMAX, de, errorMAX);
-    previous_derror = de;
-    
+    // Calculate error derivative
+    derror = derivative_smoothing_coef * (error - previous_error) / dt
+                - (1 - derivative_smoothing_coef) * derror;  // We want times in milliseconds
+    derror = clamp(-errorMAX, derror, errorMAX);
+   
     
     // variable gains
     KpMAX=Kp*Ap;
@@ -153,18 +125,18 @@ double PIDControl::get_demand(double target, double current)
     }
 
     //Control action
-    previous_mv =  scale * (Kp1 * error + Ki1 * integral + Kd1 * de);
+    demand =  scale * (Kp1 * error + Ki1 * ierror + Kd1 * derror);
 
     // cauv_control::PIDState msg;
-    // msg.mv = previous_mv;
+    // msg.mv = demand;
     // msg.error = error;
-    // msg.derror = Kd1 * de;
-    // msg.ierror = Ki1 * integral;
+    // msg.derror = Kd1 * derror;
+    // msg.ierror = Ki1 * ierror;
     // msg.Kp = Kp1;
     // msg.Kd = Kd1;
     // msg.Ki = Ki1;
 
     // state_pub.publish(msg);
 
-    return previous_mv;
+    return demand;
 }
