@@ -1,0 +1,10 @@
+<!-- To start, execute roslaunch cauv_sbgimu cauv_sbgimu.launch-->
+<launch>
+
+ <!-- cauv_sbgimu node-->
+  <node pkg="cauv_sbgimu" type="cauv_sbgimu" name="cauv_sbgimu">
+    <param name="device" type="string" value="/dev/ttyUSB0" />
+    <param name="baud_rate" value="115200" />
+    <param name="pause_time" value="10" />
+  </node>
+</launch>

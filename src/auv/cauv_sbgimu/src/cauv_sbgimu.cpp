@@ -31,9 +31,9 @@ int main(int argc, char **argv)
 
 	std::string device_name;
 	int baud_rate, pause_time;
-	nh.param<std::string>("device", device_name, "/dev/usbmon1");
-	nh.param("baud_rate", baud_rate, 115200);
-	nh.param("pause_time", pause_time, 10);
+	nh.param<std::string>("cauv_sbgimu/device", device_name, "/dev/usbmon1");
+	nh.param("cauv_sbgimu/baud_rate", baud_rate, 115200);
+	nh.param("cauv_sbgimu/pause_time", pause_time, 10);
 
 	cauv_control::msg_floatYPR imu_YPR_message;
 
