@@ -138,7 +138,8 @@ set(cauv_sbgimu_sbglib_src
 	"src/sbg/protocol/protocolOutputMode.c"
 	"src/sbg/comWrapper/comSerialUnix.c")
 
-add_library(cauv_sbgimu
+add_library(sbgimu_lib
+  STATIC
   ${cauv_sbgimu_sbglib_src}
 )
 
@@ -157,6 +158,7 @@ add_dependencies(cauv_sbgimu cauv_control_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(cauv_sbgimu
+  sbgimu_lib
   ${catkin_LIBRARIES}
 )
 
