@@ -118,16 +118,6 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(cauv_sbgimu
-#   src/${PROJECT_NAME}/cauv_sbgimu.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(cauv_sbgimu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
 set(cauv_sbgimu_sbglib_src
 	"src/sbg/time/sbgTime.c"
 	"src/sbg/sbgCom.c"
@@ -147,7 +137,19 @@ set(cauv_sbgimu_sbglib_src
 	"src/sbg/protocol/commands.c"
 	"src/sbg/protocol/protocolOutputMode.c"
 	"src/sbg/comWrapper/comSerialUnix.c")
-add_executable(cauv_sbgimu src/cauv_sbgimu.cpp src/sbg_imu.cpp ${cauv_sbgimu_sbglib_src})
+
+add_library(cauv_sbgimu
+  ${cauv_sbgimu_sbglib_src}
+)
+
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+# add_dependencies(cauv_sbgimu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Declare a C++ executable
+
+add_executable(cauv_sbgimu src/cauv_sbgimu.cpp src/sbg_imu.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
