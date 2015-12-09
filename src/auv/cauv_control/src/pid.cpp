@@ -85,6 +85,11 @@ double PIDControl::get_demand(double target, double current)
     dt = 1000*(now() - time_previous_signal); // dt is in milliseconds
     time_previous_signal = now();
 
+    // Sanity check: we don't want to divide by zero!
+    if (dt == 0) {
+        return 0;
+    }
+
     // Calculate error
     if(is_angle)
         error = getErrorAngle(target, current);
