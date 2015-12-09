@@ -35,7 +35,10 @@ include_directories(
 
 add_executable(cauv_control src/control.cpp src/pid.cpp)
 
-add_dependencies(cauv_control cauv_cangate_generate_messages_cpp)
+add_dependencies(cauv_control
+  cauv_control_generate_messages_cpp
+  cauv_cangate_generate_messages_cpp
+)
 
 target_link_libraries(cauv_control
   ${catkin_LIBRARIES}
