@@ -119,12 +119,16 @@ void ControlLoops::on_depth_demand(const std_msgs::Float32::ConstPtr depth)
     if (depth_pid->enabled) {
         const float mv = depth_pid->get_demand(target_depth, current_depth);
 
-	depth_demand.fwd_left = mv*current_rotation_matrix.aZ;
+	   depth_demand.fwd_left = mv*current_rotation_matrix.aZ;
         depth_demand.fwd_right = mv*current_rotation_matrix.aZ;
         depth_demand.horz_fore = mv*current_rotation_matrix.bZ;
         depth_demand.horz_aft = mv*current_rotation_matrix.bZ;
         depth_demand.vert_fore = mv*current_rotation_matrix.cZ;
         depth_demand.vert_aft = mv*current_rotation_matrix.cZ;
+        
+        // This code does not consider the attitude.  
+        //depth_demand.vert_fore = mv;
+        //depth_demand.vert_aft = mv;
     }
     depth_pub.publish(depth);
 }

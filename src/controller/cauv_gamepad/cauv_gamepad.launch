@@ -1,0 +1,8 @@
+<!-- %Tag(FULL)%-->
+<launch>
+
+  <include file="$(find cauv_gamepad)/$(env VEHICLE).machine" />
+  <include file="$(find cauv_gamepad)/control_op.launch" />
+
+</launch>
+<!-- %EndTag(FULL)%-->

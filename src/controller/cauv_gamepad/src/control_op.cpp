@@ -46,10 +46,11 @@ void ControlOp::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 {
   cauv_cangate::msg_motor_demand motor_command;
   if (joy->axes[5] != 0.0 && joy->axes[5] != 1.0 ){
-  	motor_command.vert_fore = v_scale_*(joy->axes[vert_l_] + joy->axes[vert_r_]);
-  	motor_command.vert_aft = v_scale_*(joy->axes[vert_l_] - joy->axes[vert_r_]);
-  	motor_command.horz_fore = h_scale_*(joy->axes[horz_l_] + joy->axes[horz_r_]);
-  	motor_command.horz_aft = h_scale_*(joy->axes[horz_l_] - joy->axes[horz_r_]);
+    // This gives a number between -v_scale_ and v_scale_
+  	motor_command.vert_fore = v_scale_*(joy->axes[vert_l_] + joy->axes[vert_r_])/2;
+  	motor_command.vert_aft = v_scale_*(joy->axes[vert_l_] - joy->axes[vert_r_])/2;
+  	motor_command.horz_fore = h_scale_*(joy->axes[horz_l_] + joy->axes[horz_r_])/2;
+  	motor_command.horz_aft = h_scale_*(joy->axes[horz_l_] - joy->axes[horz_r_])/2;
 	command_pub_.publish(motor_command);
   }
 }

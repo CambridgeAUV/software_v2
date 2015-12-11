@@ -1,0 +1,8 @@
+<!-- %Tag(FULL)%-->
+<launch>
+
+  <machine name="controller" address="<!--enter hostname-->" />
+  <machine name="beaglebone" address="ubuntu@beaglebone" />  
+
+</launch>
+<!-- %EndTag(FULL)%-->
