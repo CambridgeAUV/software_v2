@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 	if((mysocket = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) 
 	{
 		ROS_ERROR("Error while opening CAN socket");
+		return -1;
 	}
 
 	strcpy(ifr.ifr_name, ifname);
@@ -145,6 +146,7 @@ int main(int argc, char **argv)
 	if(bind(mysocket, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
 	{
 		ROS_ERROR("Error in CAN socket bind");
+		return -2;
 	}
 
 	ROS_INFO("The cauv_cangate node is up and running! \n");
