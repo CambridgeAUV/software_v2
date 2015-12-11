@@ -16,6 +16,7 @@ find_package(Boost REQUIRED COMPONENTS
 add_message_files(
   FILES
   msg_floatYPR.msg
+  msg_float_rotation_matrix.msg
 )
 
 generate_messages(

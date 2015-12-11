@@ -19,7 +19,7 @@ parameter server.
 #include "sbg_imu.h"
 
 #include "cauv_control/msg_floatYPR.h"
-
+#include "cauv_control/msg_float_rotation_matrix.h"
 using namespace cauv;
 
 int main(int argc, char **argv)
@@ -37,11 +37,14 @@ int main(int argc, char **argv)
 	nh.param("cauv_sbgimu/pause_time", pause_time, 10);
 
 	cauv_control::msg_floatYPR imu_YPR_message;
+	cauv_control::msg_float_rotation_matrix imu_rotation_matrix_message;
 
 	int error;
 	double euler[3];
+	double rotation_matrix[9];
 	
 	ros::Publisher pub_sbgimu_status = nh.advertise<cauv_control::msg_floatYPR>("cauv_sensors/imu_attitude", 1);
+	ros::Publisher pub_sbgimu_rotation_status = nh.advertise<cauv_control::msg_float_rotation_matrix>("cauv_sensors/imu_rotation_matrix", 1);
 	
 	// sbgIMU constructor takes three arguments: port, baud_rate and pause_time.  
 	sbgIMU* sbg_imu = new sbgIMU(device_name.c_str(), baud_rate, pause_time);
@@ -60,6 +63,21 @@ int main(int argc, char **argv)
 			imu_YPR_message.pitch = euler[1];
 			imu_YPR_message.roll = euler[0];
 			pub_sbgimu_status.publish(imu_YPR_message);
+		}
+
+		error = sbg_imu->get_rotation_matrix(rotation_matrix);
+		if (error == 0)
+		{
+			imu_rotation_matrix_message.aX = rotation_matrix[0];
+			imu_rotation_matrix_message.aY = rotation_matrix[1];
+			imu_rotation_matrix_message.aZ = rotation_matrix[2];
+			imu_rotation_matrix_message.bX = rotation_matrix[3];
+			imu_rotation_matrix_message.bY = rotation_matrix[4];
+			imu_rotation_matrix_message.bZ = rotation_matrix[5];
+			imu_rotation_matrix_message.cX = rotation_matrix[6];
+			imu_rotation_matrix_message.cY = rotation_matrix[7];
+			imu_rotation_matrix_message.cZ = rotation_matrix[8];
+			pub_sbgimu_rotation_status.publish(imu_rotation_matrix_message);
 		}
 		
 		//Activate callback!

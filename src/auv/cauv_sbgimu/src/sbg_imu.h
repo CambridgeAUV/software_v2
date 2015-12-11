@@ -23,6 +23,7 @@ class sbgIMU
 
         void initialise();
         int getYPR(double (&euler)[3]);
+        int get_rotation_matrix(double (&rotation_matrix)[9]);
 
     private:
         

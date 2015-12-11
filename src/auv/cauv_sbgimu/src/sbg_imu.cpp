@@ -52,12 +52,35 @@ void sbgIMU::initialise()
     if (error != SBG_NO_ERROR) {
         ROS_WARN("Sbg not connected. ");
     }
-
 }
 
 sbgIMU::~sbgIMU()
 {
     sbgProtocolClose(protocolHandle);
+}
+
+
+int sbgIMU::get_rotation_matrix(double (&rotation_matrix)[9])
+{
+    error = sbgGetSpecificOutput(protocolHandle, SBG_OUTPUT_MATRIX, &output);
+    if (error == SBG_NO_ERROR)
+    {
+        // X - forward, z - upwards
+	// Matrix in the form of <aX, aY, aZ, bX, bY, bZ, cX, cY, cZ>
+	
+	for(int i=0;i<9;i++)
+	{
+		rotation_matrix[i]=output.stateMatrix[i];
+	}
+
+        return 0;
+    }
+    else
+    {
+        ROS_WARN_STREAM("Lost connection to sbg, error code: " << error);
+        return -1;
+    }
+    //sbgSleep(m_pause_time);
 }
 
 

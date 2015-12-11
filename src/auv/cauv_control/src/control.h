@@ -10,6 +10,7 @@
 #include "pid.h"
 
 #include <std_msgs/Float32.h>
+#include <cauv_control/msg_float_rotation_matrix.h>
 #include <cauv_control/msg_floatYPR.h>
 #include <cauv_cangate/msg_motor_demand.h>
 
@@ -36,13 +37,18 @@ class ControlLoops
 
         // Callback functions for sensor inputs
         inline void on_attitude_input(const cauv_control::msg_floatYPR::ConstPtr attitude){ current_attitude = *attitude; }
-        inline void on_depth_input(const std_msgs::Float32::ConstPtr depth){ current_depth = depth->data; }
+        inline void on_depth_input(const std_msgs::Float32::ConstPtr depth)
+{ current_depth = depth->data; }
+        inline void on_rotation_matrix_input(const cauv_control::msg_float_rotation_matrix::ConstPtr rotation_matrix)
+{ current_rotation_matrix = *rotation_matrix; }
+
 
         ros::NodeHandle nh;
 
         // Picks up data from the sensor topics
         ros::Subscriber attitude_input_sub;
         ros::Subscriber depth_input_sub;
+        ros::Subscriber rotation_matrix_input_sub;
 
         // Retrieves the YPR, depth and external demands
         ros::Subscriber external_demand_sub;
@@ -59,6 +65,8 @@ class ControlLoops
 
         cauv_control::msg_floatYPR current_attitude;
         cauv_control::msg_floatYPR target_attitude;
+
+        cauv_control::msg_float_rotation_matrix current_rotation_matrix;
 
         double current_depth;
         double target_depth;

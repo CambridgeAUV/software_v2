@@ -55,6 +55,7 @@ ControlLoops::ControlLoops()
     // Subscribe from sensor topics
     attitude_input_sub = nh.subscribe("cauv_sensors/imu_attitude", 1, &ControlLoops::on_attitude_input, this);
     depth_input_sub = nh.subscribe("cauv_sensors/pressure_depth", 1, &ControlLoops::on_depth_input, this);
+    rotation_matrix_input_sub = nh.subscribe("cauv_sensors/imu_rotation_matrix", 1, &ControlLoops::on_rotation_matrix_input, this);
 
     // Publish to motor demand topic
     motor_demand_pub = nh.advertise<cauv_cangate::msg_motor_demand>("cauv_motor_demand", 1);
@@ -117,13 +118,19 @@ void ControlLoops::on_depth_demand(const std_msgs::Float32::ConstPtr depth)
     target_depth = depth->data;
     if (depth_pid->enabled) {
         const float mv = depth_pid->get_demand(target_depth, current_depth);
-        depth_demand.vert_fore = mv;
-        depth_demand.vert_aft = mv;
+
+	depth_demand.fwd_left = mv*current_rotation_matrix.aZ;
+        depth_demand.fwd_right = mv*current_rotation_matrix.aZ;
+        depth_demand.horz_fore = mv*current_rotation_matrix.bZ;
+        depth_demand.horz_aft = mv*current_rotation_matrix.bZ;
+        depth_demand.vert_fore = mv*current_rotation_matrix.cZ;
+        depth_demand.vert_aft = mv*current_rotation_matrix.cZ;
     }
     depth_pub.publish(depth);
 }
 
 void ControlLoops::on_external_demand(const cauv_cangate::msg_motor_demand::ConstPtr msg) {
+
     external_demand.fwd_left = msg->fwd_left;
     external_demand.fwd_right = msg->fwd_right;
     external_demand.vert_fore = msg->vert_fore;
