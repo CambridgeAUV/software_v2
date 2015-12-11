@@ -117,6 +117,8 @@ void ControlLoops::on_depth_demand(const std_msgs::Float32::ConstPtr depth)
     target_depth = depth->data;
     if (depth_pid->enabled) {
         const float mv = depth_pid->get_demand(target_depth, current_depth);
+
+        // This code does not consider the attitude.  
         depth_demand.vert_fore = mv;
         depth_demand.vert_aft = mv;
     }
