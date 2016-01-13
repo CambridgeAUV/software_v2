@@ -71,6 +71,9 @@ class CanGate
 
     void get_can_frame()
     {
+        // TODO:
+        // This read is always blocking, thus the process *never* answers to SIGTERM.  
+        // It's not that annoying, but if someone is interested in solving this, please do. 
 		read(mysocket, &last_frame_in_buffer, sizeof(struct can_frame));
     }
 
@@ -166,13 +169,9 @@ class CanGate
 };
 
 
-        
-
-
 
 int main(int argc, char **argv)
 {
-	ros::Rate loopRate(100);
 	ros::init(argc, argv, "cauv_cangate");
 
 	ROS_INFO("Initialising the cauv_cangate node");
@@ -180,6 +179,8 @@ int main(int argc, char **argv)
 	boost::shared_ptr<CanGate> can_gate = boost::make_shared<CanGate>();
 
 	ROS_INFO("The cauv_cangate node is up and running! \n");
+
+    ros::Rate loopRate(100);
 
 	while (ros::ok())
 	{		
@@ -189,6 +190,8 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		loopRate.sleep();
 	}
+
+    can_gate.reset();
 
 	return 0;
 }
