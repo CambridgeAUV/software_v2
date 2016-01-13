@@ -36,7 +36,7 @@ class CanGate
 {
     public:
 
-    CanGate(): ifname("can0")
+    CanGate(): ifname("can0"), forward_pressure(0), back_pressure(0)
     {
 	 	sub_motor_command = mynode.subscribe("cauv_motor_demand", 1, &CanGate::cauv_motor_send_command, this);
 	 	pub_depth_status = mynode.advertise<std_msgs::Float64>("cauv_cangate/cauv_depth_status", 1);
@@ -114,7 +114,13 @@ class CanGate
 
 	float calc_depth()
 	{
-		return (depthFromForePressure(forward_pressure) + depthFromAftPressure(back_pressure)) / 2;
+        if (forward_pressure == 0 && back_pressure == 0) return 0;
+
+        else if (forward_pressure == 0) return depthFromAftPressure(back_pressure);
+
+        else if (back_pressure == 0) return depthFromForePressure(forward_pressure);
+        
+        else return (depthFromForePressure(forward_pressure) + depthFromAftPressure(back_pressure)) / 2;
 	}
 
 	float depthFromForePressure(float const& pressure) const
