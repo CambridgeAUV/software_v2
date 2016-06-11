@@ -31,10 +31,30 @@ int main(int argc, char **argv)
 
 	std::string device_name;
 	int baud_rate, pause_time;
-	ROS_INFO(device_name.c_str());
-	nh.param<std::string>("cauv_sbgimu/device", device_name, "/dev/usbmon1");
-	nh.param("cauv_sbgimu/baud_rate", baud_rate, 115200);
-	nh.param("cauv_sbgimu/pause_time", pause_time, 10);
+	//ROS_INFO(device_name.c_str());
+
+	// Import parameters to initialise imu device from parameter server
+	// Exit with error if parameters not found.
+	// device_name, baud_rate, pause_time
+	bool got_device_name = ros::param::get("cauv_sbgimu/device", device_name);
+	if (!got_device_name)
+	{
+		ROS_FATAL_STREAM("Could not get parameter: device");
+		exit(1);
+	}
+	bool got_baud_rate = ros::param::get("cauv_sbgimu/baud_rate", baud_rate);
+	if (!got_baud_rate)
+	{
+		ROS_FATAL_STREAM("Could not get parameter: baud_rate");
+		exit(2);
+	}
+	bool got_pause_time = ros::param::get("cauv_sbgimu/pause_time", pause_time);
+	if (!got_pause_time)
+	{
+		ROS_FATAL_STREAM("Could not get parameter: pause_time");
+		exit(3);
+	}
+
 
 	cauv_control::msg_floatYPR imu_YPR_message;
 	cauv_control::msg_float_rotation_matrix imu_rotation_matrix_message;
