@@ -1,17 +1,45 @@
 <launch>
- <group ns="cauv_control/PID/yaw">
-   <param name="Kp" value="3.5" />
-   <param name="Ki" value="0.0" />
-   <param name="Kd" value="35.0" />
-   <param name="scale" value="-1.0" />
-   <param name="Ap" value="1.3" />
-   <param name="Ai" value="1.3" />
-   <param name="Ad" value="1.0" />
-   <param name="thr" value="1.0" />
-   <param name="errorMAX" value="150.0" />
- </group>
+ 
+  <!-- Yaw PID parameters -->
+  <group ns="cauv_control/PID/yaw">
+    <param name="Kp" value="3.5" />
+    <param name="Ki" value="0.0" />
+    <param name="Kd" value="35.0" />
+    <param name="scale" value="-1.0" />
+    <param name="Ap" value="1.3" />
+    <param name="Ai" value="1.3" />
+    <param name="Ad" value="1.0" />
+    <param name="thr" value="1.0" />
+    <param name="errorMAX" value="150.0" />
+  </group>
 
- <node pkg="cauv_control" type="cauv_control" name="cauv_control" />
+  <!-- Depth PID parameters -->
+  <group ns="cauv_control/PID/depth">
+    <param name="Kp" value="40.0" />
+    <param name="Ki" value="0.6" />
+    <param name="Kd" value="500.0" />
+    <param name="scale" value="1.0" />
+    <param name="Ap" value="2.0" />
+    <param name="Ai" value="2.0" />
+    <param name="Ad" value="2.0" />
+    <param name="thr" value="1.0" />
+    <param name="errorMAX" value="40.0" />
+  </group>
+  
+  <!-- Pitch PID parameters -->
+  <group ns="cauv_control/PID/pitch">
+    <param name="Kp" value="0.5" />
+    <param name="Ki" value="0.1" />
+    <param name="Kd" value="10.0" />
+    <param name="scale" value="1.0" />
+    <param name="Ap" value="1.0" />
+    <param name="Ai" value="1.0" />
+    <param name="Ad" value="1.0" />
+    <param name="thr" value="1.0" />
+    <param name="errorMAX" value="5.0" />
+  </group>
+
+  <node pkg="cauv_control" type="cauv_control" name="cauv_control" />
  
 
 </launch>

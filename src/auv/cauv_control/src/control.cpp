@@ -73,8 +73,10 @@ ControlLoops::ControlLoops()
     depth_pid = boost::make_shared<PIDControl>(true);
     pitch_pid = boost::make_shared<PIDControl>(false);
 
-    //TODO: Find the correct values to initialise the PID loops
+    //TODO add error checking, reduce repetitive code
     // Kp, Ki, Kd, scale, Ap, Ai, Ad, thr, errorMAX (all doubles)
+
+    // Get yaw pid coefficients from parameter server
     // cauv_control/PID/yaw
     double yaw_Kp, yaw_Ki, yaw_Kd, 
            yaw_Ap, yaw_Ai, yaw_Ad, 
@@ -90,13 +92,52 @@ ControlLoops::ControlLoops()
     bool got_yaw_scale 	= ros::param::get("cauv_control/PID/yaw/scale", yaw_scale);
     bool got_yaw_errorMAX = ros::param::get("cauv_control/PID/yaw/errorMAX", yaw_errorMAX);
 
+    //Initialise yaw_pid loop from retrieved parameters
     yaw_pid->initialise(yaw_Kp, yaw_Ki, yaw_Kd, yaw_scale, yaw_Ap, yaw_Ai,
                        yaw_Ad, yaw_thr, yaw_errorMAX);
+    
+
+    // Get depth pid coefficients from parameter server
+    // cauv_control/PID/depth
+    double depth_Kp, depth_Ki, depth_Kd, 
+           depth_Ap, depth_Ai, depth_Ad, 
+	   depth_thr, depth_scale, depth_errorMAX;
+
+    bool got_depth_Kp 	= ros::param::get("cauv_control/PID/depth/Kp", depth_Kp);
+    bool got_depth_Ki 	= ros::param::get("cauv_control/PID/depth/Ki", depth_Ki);
+    bool got_depth_Kd	= ros::param::get("cauv_control/PID/depth/Kd", depth_Kd);
+    bool got_depth_Ap 	= ros::param::get("cauv_control/PID/depth/Ap", depth_Ap);
+    bool got_depth_Ai 	= ros::param::get("cauv_control/PID/depth/Ai", depth_Ai);
+    bool got_depth_Ad 	= ros::param::get("cauv_control/PID/depth/Ad", depth_Ad);
+    bool got_depth_thr 	= ros::param::get("cauv_control/PID/depth/thr", depth_thr);
+    bool got_depth_scale 	= ros::param::get("cauv_control/PID/depth/scale", depth_scale);
+    bool got_depth_errorMAX = ros::param::get("cauv_control/PID/depth/errorMAX", depth_errorMAX);
+
+    //Initialise depth_pid loop from retrieved parameters
+    depth_pid->initialise(depth_Kp, depth_Ki, depth_Kd, depth_scale, depth_Ap, depth_Ai,
+                       depth_Ad, depth_thr, depth_errorMAX);
 
 
-    //yaw_pid->initialise();
-    //depth_pid->initialise();
-    //pitch_pid->initialise();
+    // Get pitch pid coefficients from parameter server
+    // cauv_control/PID/pitch
+    double pitch_Kp, pitch_Ki, pitch_Kd, 
+           pitch_Ap, pitch_Ai, pitch_Ad, 
+	   pitch_thr, pitch_scale, pitch_errorMAX;
+
+    bool got_pitch_Kp 	= ros::param::get("cauv_control/PID/pitch/Kp", pitch_Kp);
+    bool got_pitch_Ki 	= ros::param::get("cauv_control/PID/pitch/Ki", pitch_Ki);
+    bool got_pitch_Kd	= ros::param::get("cauv_control/PID/pitch/Kd", pitch_Kd);
+    bool got_pitch_Ap 	= ros::param::get("cauv_control/PID/pitch/Ap", pitch_Ap);
+    bool got_pitch_Ai 	= ros::param::get("cauv_control/PID/pitch/Ai", pitch_Ai);
+    bool got_pitch_Ad 	= ros::param::get("cauv_control/PID/pitch/Ad", pitch_Ad);
+    bool got_pitch_thr 	= ros::param::get("cauv_control/PID/pitch/thr", pitch_thr);
+    bool got_pitch_scale 	= ros::param::get("cauv_control/PID/pitch/scale", pitch_scale);
+    bool got_pitch_errorMAX = ros::param::get("cauv_control/PID/pitch/errorMAX", pitch_errorMAX);
+
+    //Initialise pitch_pid loop from retrieved parameters
+    pitch_pid->initialise(pitch_Kp, pitch_Ki, pitch_Kd, pitch_scale, pitch_Ap, pitch_Ai,
+                       pitch_Ad, pitch_thr, pitch_errorMAX);
+
 }
 
 void ControlLoops::update_motor_demand()
