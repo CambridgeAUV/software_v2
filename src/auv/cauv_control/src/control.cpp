@@ -74,6 +74,26 @@ ControlLoops::ControlLoops()
     pitch_pid = boost::make_shared<PIDControl>(false);
 
     //TODO: Find the correct values to initialise the PID loops
+    // Kp, Ki, Kd, scale, Ap, Ai, Ad, thr, errorMAX (all doubles)
+    // cauv_control/PID/yaw
+    double yaw_Kp, yaw_Ki, yaw_Kd, 
+           yaw_Ap, yaw_Ai, yaw_Ad, 
+	   yaw_thr, yaw_scale, yaw_errorMAX;
+
+    bool got_yaw_Kp 	= ros::param::get("cauv_control/PID/yaw/Kp", yaw_Kp);
+    bool got_yaw_Ki 	= ros::param::get("cauv_control/PID/yaw/Ki", yaw_Ki);
+    bool got_yaw_Kd	= ros::param::get("cauv_control/PID/yaw/Kd", yaw_Kd);
+    bool got_yaw_Ap 	= ros::param::get("cauv_control/PID/yaw/Ap", yaw_Ap);
+    bool got_yaw_Ai 	= ros::param::get("cauv_control/PID/yaw/Ai", yaw_Ai);
+    bool got_yaw_Ad 	= ros::param::get("cauv_control/PID/yaw/Ad", yaw_Ad);
+    bool got_yaw_thr 	= ros::param::get("cauv_control/PID/yaw/thr", yaw_thr);
+    bool got_yaw_scale 	= ros::param::get("cauv_control/PID/yaw/scale", yaw_scale);
+    bool got_yaw_errorMAX = ros::param::get("cauv_control/PID/yaw/errorMAX", yaw_errorMAX);
+
+    yaw_pid->initialise(yaw_Kp, yaw_Ki, yaw_Kd, yaw_scale, yaw_Ap, yaw_Ai,
+                       yaw_Ad, yaw_thr, yaw_errorMAX);
+
+
     //yaw_pid->initialise();
     //depth_pid->initialise();
     //pitch_pid->initialise();
